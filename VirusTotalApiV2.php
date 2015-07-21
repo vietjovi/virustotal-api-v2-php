@@ -44,9 +44,7 @@ class VirusTotalAPIV2 {
 			$fileName = $pathInfo['basename'];
 		
 			$parameters = array(
-					'file' => '@' . $realPath . ';' .
-					'type=' . mime_content_type($fileName) . ';' .
-					'filename=' . $fileName
+					'file' => new CurlFile($realPath, mime_content_type($realPath), $fileName)
 				);
 		} else {
 			// Due to a bug in some older curl versions
@@ -254,10 +252,10 @@ class VirusTotalAPIV2 {
 	
 	private function _doCall($apiTarget, $parameters) {
 		$postFields = array(
-				'key' => $this->_key
+				'apikey' => $this->_key
 			);
 		$postFields = array_merge($parameters, $postFields);
-
+		var_dump($postFields);
 		$ch = curl_init(VirusTotalAPIV2::URL_API_BASIS . $apiTarget);
 		curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 		curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
@@ -266,11 +264,12 @@ class VirusTotalAPIV2 {
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('User-Agent: Opera/9.80 (Windows NT 6.2; Win64; x64) Presto/2.12.388 Version/12.15','Content-Type: multipart/form-data'));
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
 		$response = curl_exec($ch);
 		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
 		curl_close($ch);
-
+		var_dump($response);
 		if ($httpCode == '429') {
 			return array(
 					'response_code' => -3
